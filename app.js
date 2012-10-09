@@ -11,8 +11,8 @@ var express = require('express')
   , compressor = require('compressor');
 
 var app = express();
-
-compressor.hello();
+var fm = require('compressor/filemanager');
+fm.filemanage();
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -20,7 +20,7 @@ app.configure(function(){
   app.set('view engine', 'jade');
   app.use(express.favicon());
   app.use(express.logger('dev'));
-  app.use(express.bodyParser());
+  app.use(express.bodyParser({uploadDir: './uploads'}));
   app.use(express.methodOverride());
   app.use(app.router);
   app.use(express.static(path.join(__dirname, 'public')));
@@ -32,6 +32,16 @@ app.configure('development', function(){
 
 app.get('/', routes.index);
 app.get('/users', user.list);
+
+app.post('/file-upload', function(req, res, next){
+  res.send(req.body,req.files);
+  var param = {};
+  param.type = parseInt(req.body.type);
+  param.text = req.body.content;
+  param.files = req.files.cfile;
+  param.url = req.body.url;
+  compressor.compress(param);
+});
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
