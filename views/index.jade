@@ -1,18 +1,76 @@
 doctype 5
 html
 	head
-		title = title
+		title #{title}
+		link(rel = 'stylesheet', href = '/lib/bootstrap/css/bootstrap.min.css')
 		link(rel = 'stylesheet', href = '/stylesheets/style.css')
 	body
-		form(action = "/file-upload", method = "post", enctype = "multipart/form-data")
-			input(type = "file", name = "cfile", multiple)
-			input(type = 'hidden', name = "type", value = 1)
-			input(type = 'submit', value='submit')
-		form(action = "/file-upload", method = "post", enctype = "multipart/form-data")
-			textarea(type = 'text', name='content')
-			input(type = 'hidden', name = "type", value = 0)
-			input(type = 'submit', value='submit')
-		form(action = "/file-upload", method = "post", enctype = "multipart/form-data")
-			input(type= 'text', name='url')
-			input(type = 'hidden', name = "type", value = 2)
-			input(type = 'submit', value='submit')
+		div.container
+			div.page-header
+				h1 Javascript/CSS Compression
+			form(action="/compress", method='post', target='proxy', enctype = "multipart/form-data").form-horizontal
+				input(type = 'hidden', name = "type", value = 0)#type
+				div.tabbale#mainTab
+					ul.nav.nav-tabs
+						li.active
+							a(href = '#lA', data-toggle='tab', type = '0') Section 1 
+						li
+							a(href = '#lB', data-toggle='tab', type = '1') Section 2
+						li
+							a(href = '#lC', data-toggle='tab', type = '2') Section 3
+					div.tab-content
+						div.tab-pane.active.control-group#lA
+							label(for="content").control-label	 Code
+							div.controls
+								textarea(name="content", rows='5', cols='80')#content.span9
+								span.help-block Paste a block of CSS or JS code here
+						div.tab-pane#lB
+							label(for="cfile").control-label File(s)
+							div.controls
+								input(type="file", multiple, name="cfile")#cfile
+						div.tab-pane#lC
+							label(for="curl").control-label URL(s)
+							div.controls
+								ol.urls
+									li
+										input(type="text", multiple, name="curl")#curl.span6
+										a.btn.btn-warning.removeUrl
+											i.icon-remove
+								a.btn.btn-primary.more More
+					div.control-group
+						label(for='type').control-label File Type
+						div.controls
+							select(name="type").span2#type
+								option AUTO
+								option JS
+								option CSS
+					fieldset.options
+						legend Options
+						div.control-group
+							label.control-label Global Options
+							div.controls
+								label.checkbox Display information messages and warnings.
+									input(type="checkbox", name="verbose")#verbose
+								label
+									input(type="number", name="jslinebreak")#linebreak.span2
+									|  Insert a line break after the specified column number.
+						div.control-group
+							label.control-label Javascript Options
+							div.controls
+								label.checkbox Minify only, no symbol obfuscation.
+									input(type="checkbox", name="nomunge")#nomunge
+								label.checkbox Preserve unnecessary semicolons (such as right before a '}').
+									input(type="checkbox", name="semi")#semi
+								label.checkbox Disable all the built-in micro optimizations.
+									input(type="checkbox", name="nooptimize")#nooptimize
+						div.control-group
+							label.control-label CSS Options
+							div.controls
+								label.checkbox  Insert a line breaks after '}' characters.
+									input(type="checkbox", name="csslinebreak")
+				div
+					input(type="submit",data-loading-text="compressing").btn.btn-primary.btn-large#submit submit
+			iframe#proxy
+		script(type = 'text/Javascript', src = '/lib/jquery-1.8.2.min.js')
+		script(type = 'text/Javascript', src = '/lib/bootstrap/js/bootstrap.min.js')
+		script(type = 'text/Javascript', src = '/javascripts/compressor.js')

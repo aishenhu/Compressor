@@ -1,8 +1,40 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin:0;
+  padding:0;
 }
 
 a {
   color: #00B7FF;
+}
+
+#proxy {
+	display: none;
+}
+
+label{
+	display: block;
+	margin-bottom: 5px;
+	color:#333;
+	font-size:13px;
+	font-weight: normal;
+	line-height: 18px;
+}
+
+.options {
+	border-bottom: 1px solid #E5E5E5;
+	margin-bottom: 20px;
+}
+
+.removeUrl{
+	margin-left: 10px;
+}
+
+.more{
+	margin-bottom: 10px;
+}
+
+.urls li{
+	margin-bottom:10px;
 }
