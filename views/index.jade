@@ -40,10 +40,20 @@ html
 					div.control-group
 						label(for='type').control-label File Type
 						div.controls
-							select(name="type").span2#type
-								option AUTO
-								option JS
-								option CSS
+							select(name="filetype").span2#filetype
+								option js
+								option css
+								option auto
+					div.control-group
+						label(for='cmethod').control-label Compress Method
+						div.controls
+							label.radio
+								input(type="radio", name="cmethod", value="1",checked='true')
+								|batch
+							label.radio
+								input(type="radio", name="cmethod", value="2")
+								|combine
+							
 					fieldset.options
 						legend Options
 						div.control-group

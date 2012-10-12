@@ -8,11 +8,12 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
+  ,exec = require('child_process').exec
   , compressor = require('compressor');
 
 var app = express();
 var fm = require('compressor/filemanager');
-//fm.filemanage();
+fm.filemanage();
 
 app.configure(function(){
   app.set('port', process.env.PORT || 3000);
@@ -69,11 +70,66 @@ app.post('/compress', function(req, res, next){
   param.type = parseInt(req.body.type);
   param.text = req.body.content;
   param.files = req.files.cfile;
-  param.url = req.body.url;
-  param.callback = function(msg){
-    var ret = '<script> var msg = ' + JSON.stringify(msg) + ';parent.Compressor.callback(msg);</script>';
-    res.send(ret);
+  param.url = req.body.curl;
+  param.filetype = req.body.filetype.toLowerCase();
+  param.cmethod = req.body.cmethod; //1 batch; 2 combine
+  var total = 0;
+  var retmsg = [];
+  switch(param.type){
+    case 0:
+      total = 1;
+      break;
+    case 1:
+      total = Object.prototype.toString.call( param.files ) === '[object Array]' ? param.files.length : 1;
+      break;
+    case 2:
+      total = Object.prototype.toString.call( param.url ) === '[object Array]' ? param.url.length : 1;
   }
+  param.callback = function(msg){
+    retmsg.push(msg);
+    if(retmsg.length == total){
+      // batch process 
+      if(param.cmethod == 1){
+        var tarResultName = (+new Date()) + '.tar.gz';
+        var tarCommand = 'cd tmp && tar -zcvf ' + tarResultName + ' ';
+        for(var i in retmsg){
+          tarCommand += retmsg[i].path + ' ';
+        }
+        exec(tarCommand, function(err){
+          if(err){
+            console.log(err);
+          }
+
+          var ret = '<script>var p = "' + tarResultName + '";var msg = ' + JSON.stringify(retmsg) + ';parent.Compressor.callback(msg);</script>';
+          res.send(ret);
+          res.end();  
+          
+        });
+      }else{
+        var combineCommand = "cd tmp && cat ";
+        for(var i in retmsg){
+          combineCommand += retmsg[i].path + ' ';
+        }
+        var resultPath = (+new Date()) + '.all.'+ param.filetype;
+        combineCommand += ' > '+ resultPath;
+        exec(combineCommand, function(err){
+          if(err){
+            console.log(err);
+          }
+          var retmsg = [{
+            'path': resultPath,
+            'name': resultPath,
+            'msg': 'compress success'
+          }];
+          var ret = 'var msg = ' + JSON.stringify(retmsg) + ';parent.Compressor.callback(msg);</script>';
+          res.send(ret);
+          res.end();  
+
+        });
+      }    
+    }    
+  }
+  //console.log(param);
   compressor.compress(param);
 });
 
