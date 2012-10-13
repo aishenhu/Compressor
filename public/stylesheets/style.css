@@ -38,3 +38,38 @@ label{
 .urls li{
 	margin-bottom:10px;
 }
+
+#console{
+	background: #000;
+	height: 200px;
+	resize:none;
+	margin-bottom:50px;
+	overflow-y:scroll; 
+}
+
+.consoleContainer{
+	color:#A6E22E;
+	position: relative;
+}
+
+#clear{
+	position: absolute;
+	top: 5px;
+	right: 25px;
+}
+
+.warning {
+	color: #FAA52C;
+}
+
+.info{
+	color: #3EA4C2;
+}
+
+.error{
+	color:#D14741;
+}
+
+a {
+	text-decoration: underline;
+}

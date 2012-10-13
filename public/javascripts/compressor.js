@@ -31,11 +31,24 @@
 					$(this).parent().find('input').val('');
 				}
 			});
+
+			//console clear function
+			$('#clear').click(function(){
+				$('#console').empty();
+			});
+
+			$('#submit').click(this.onStartCompress);
 		},
 
 		//reset form value
 		resetForm : function(){
+			var log = $('#console');
+			$(log).append('processing...');
+		},
 
+		onStartCompress : function(){
+			var log = $('#console');
+			$(log).append('<p>Processing...</p>');
 		},
 
 		//var msg = [{"retcode":0,"path":"22017ae4372435e74cc9f33c011d0766.min.js","msg":"compress success"},
@@ -43,12 +56,20 @@
 		//	parent.Compressor.callback(msg);
 
 		callback: function(msg){
-
+			var log = $('#console');
+			log.append('<p class="warning">Get result:</p>');
+			$(log).append('-----------------------------------------------------------------------------\n');
 			for(var i in msg){
-				$(document.body).append('<p>file ' + msg[i].name + msg[i].msg + '</p>');
-				$(document.body).append('<a href="/download?file=' + msg[i].path + '">download</a>');
+				var c = "info";
+				if(msg[i].retcode == '-1'){
+					c = 'error';
+				}
+				log.append('<p class="'+c+'">file ' + msg[i].name + " : " + msg[i].msg + '</p>');
+				if(msg[i].retcode != -1){
+					log.append('<p>下载文件: <a href="/download?file=' + msg[i].path + '">download</a></p>');
+				}
 			}
-			$(document.body).append('-------------------------------------\n');
+			$(log).append('-----------------------------------------------------------------------------\n\n\n');
 		}
 	}
 
