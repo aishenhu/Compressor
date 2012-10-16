@@ -8,7 +8,8 @@ var express = require('express')
   , user = require('./routes/user')
   , http = require('http')
   , path = require('path')
-  ,exec = require('child_process').exec
+  , exec = require('child_process').exec
+  , fs = require('fs')
   , compressor = require('compressor');
 
 var app = express();
@@ -73,8 +74,37 @@ app.post('/compress', function(req, res, next){
   param.url = req.body.curl;
   param.filetype = req.body.filetype.toLowerCase();
   param.cmethod = req.body.cmethod; //1 batch; 2 combine
+
+  //compress options
+  param.verbose = req.body.verbose || '';
+  param.linebreak = req.body.jslinebreak || -1;
+  param.nomunge = req.body.nomunge || '';
+  param.semi = req.body.semi || '';
+  param.nooptimize = req.body.nooptimize || '';
+
+
   var total = 0;
   var retmsg = [];
+
+  //convert option to string
+  var option = (function(){
+    var str = " ";
+    if(param.linebreak > -1){
+      str += "--line-break " + param.linebreak + " "
+    }
+    if(param.nomunge == 'on'){
+      str += " --nomunge ";
+    }
+    if(param.semi == 'on'){
+      str += " --preserve-semi ";
+    }
+    if(param.nooptimize == 'on'){
+      str += ' --disable-optimizations ';
+    }
+    return str;
+  })();
+
+  param.option = option;
   switch(param.type){
     case 0:
       total = 1;
@@ -85,6 +115,8 @@ app.post('/compress', function(req, res, next){
     case 2:
       total = Object.prototype.toString.call( param.url ) === '[object Array]' ? param.url.length : 1;
   }
+
+  //define the callback function, invoked when a file is compressed 
   param.callback = function(msg){
     retmsg.push(msg);
     if(retmsg.length == total){
@@ -100,15 +132,18 @@ app.post('/compress', function(req, res, next){
             console.log(err);
           }
 
-          var ret = '<script>var p = "' + tarResultName + '";var msg = ' + JSON.stringify(retmsg) + ';parent.Compressor.callback(msg);</script>';
+          var ret = '<script>var p = "' + tarResultName + '";var msg = ' + JSON.stringify(retmsg) + ';parent.Compressor.callback(msg,p);</script>';
           res.send(ret);
           res.end();  
           
         });
       }else{
         var combineCommand = "cd tmp && cat ";
+        var originSize = 0;
+        var resultSize = 0;
         for(var i in retmsg){
           combineCommand += retmsg[i].path + ' ';
+          originSize += retmsg[i].originSize;
         }
         var resultPath = (+new Date()) + '.all.'+ param.filetype;
         combineCommand += ' > '+ resultPath;
@@ -116,20 +151,26 @@ app.post('/compress', function(req, res, next){
           if(err){
             console.log(err);
           }
-          var retmsg = [{
-            'path': resultPath,
-            'name': resultPath,
-            'msg': 'compress success'
-          }];
-          var ret = 'var msg = ' + JSON.stringify(retmsg) + ';parent.Compressor.callback(msg);</script>';
-          res.send(ret);
-          res.end();  
-
+          fs.stat('tmp/'+resultPath, function(err, stats){
+            resultSize = stats.size;
+            if(err){
+              console.log('err', err);
+            }
+            var retmsg = [{
+              'path': resultPath,
+              'name': resultPath,
+              'msg': 'compress success',
+              'originSize': originSize,
+              'resultSize': resultSize
+            }];
+            var ret = '<script>var msg = ' + JSON.stringify(retmsg) + ';parent.Compressor.callback(msg);</script>';
+            res.send(ret);
+            res.end();  
+          });
         });
       }    
     }    
   }
-  //console.log(param);
   compressor.compress(param);
 });
 

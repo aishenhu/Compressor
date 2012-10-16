@@ -55,7 +55,7 @@
 		//	{"retcode":0,"path":"6b810d18609f8893098b2751c44c9ead.min.js","msg":"compress success"}];
 		//	parent.Compressor.callback(msg);
 
-		callback: function(msg, p){
+		callback: function(msg){
 			var log = $('#console');
 			log.append('<p class="warning">Get result:</p>');
 			$(log).append('-----------------------------------------------------------------------------\n');
@@ -66,16 +66,11 @@
 				}
 				log.append('<p class="'+c+'">file ' + msg[i].name + " : " + msg[i].msg + '</p>');
 				if(msg[i].retcode != -1){
-					if($('#verbose').val() == 'on'){
-						log.append('<p>原始大小&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;压缩大小&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;压缩比率</p>');
-						log.append('<p><span class="numInfo">'+ msg[i].originSize + '</span><span class="numInfo">' + msg[i].resultSize + '</span><span class="numInfo">' + ((msg[i].originSize - msg[i].resultSize)  / msg[i].originSize).toFixed(2)* 100 +"%" + '</span></p>');
-					}
 					log.append('<p>下载文件: <a href="/download?file=' + msg[i].path + '">download</a></p>');
 				}
 			}
 			if(p){
-				log.append('<p>打包下载: <a href="/download?file=' + p + '">download</a></p>')
-			}
+
 			$(log).append('-----------------------------------------------------------------------------\n\n\n');
 		}
 	}
